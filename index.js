@@ -48,7 +48,7 @@ Pre.prototype.createReadStream = function(opts) {
       if (!startSet && start.indexOf(prop) > -1) {
         startSet = true;
       }
-      if (!startSet && end.indexOf(prop) > -1) {
+      if (!endSet && end.indexOf(prop) > -1) {
         endSet = true;
       }
     }
