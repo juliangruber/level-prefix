@@ -3,6 +3,8 @@
 
 This is a work in progress for a lighter level-sublevel. Feedback is appreciated!
 
+[![build status](https://secure.travis-ci.org/juliangruber/level-prefix.png)](http://travis-ci.org/juliangruber/level-prefix)
+
 ## Example
 
 ```js
