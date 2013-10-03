@@ -1,7 +1,7 @@
 {
   "name": "level-prefix",
   "description": "Get prefixed databases",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/juliangruber/level-prefix.git"
@@ -11,12 +11,11 @@
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "level"  : "0.17.x",
-    "tape"   : "1.1.x",
-    "rimraf" : "2.2.x"
+    "level": "0.17.x",
+    "tape": "1.1.x",
+    "rimraf": "2.2.x"
   },
   "keywords": [
     "level",
