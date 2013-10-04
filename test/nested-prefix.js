@@ -2,6 +2,7 @@ var pre    = require('../'),
     level  = require('level'),
     test   = require('tape'),
     rimraf = require('rimraf'),
+    after  = require('after'),
     db, path, preDb, prefix;
 
 path = '/tmp/test-level-prefix';
@@ -43,12 +44,6 @@ rimraf(path, function(err) {
           cb = cb || noop;
           cb();
         });
-      }
-
-      function after(counter, cb) {
-        return function() {
-          if (!--counter) { cb(); }
-        }
       }
 
       nextTest = after(3, function() {
