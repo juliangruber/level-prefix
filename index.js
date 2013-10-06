@@ -1,5 +1,5 @@
-var Transform = require('stream').Transform,
-    Duplex    = require('stream').Duplex;
+var Transform = require('stream').Transform;
+var Duplex    = require('stream').Duplex;
 
 module.exports = install;
 
