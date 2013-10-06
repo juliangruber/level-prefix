@@ -1,38 +1,36 @@
-var pre    = require('../'),
-    level  = require('level'),
-    test   = require('tape'),
-    rimraf = require('rimraf'),
-    db, path, preDb, prefix;
-
-path = '/tmp/test-level-prefix';
+var pre    = require('../');
+var level  = require('level');
+var test   = require('tape');
+var rimraf = require('rimraf');
+var after  = require('after');
+var db;
+var preDb;
+var prefix;
+var path = '/tmp/test-level-prefix';
 
 rimraf(path, function(err) {
   if (err) { throw err; }
 
   function setup(cb) {
-    var counter;
+    var next;
 
     db      = level(path);
     prefix  = 'ns-';
     preDb   = pre(db).prefix(prefix);
-    counter = 12;
-
-    function after(err) {
-      if (err) { throw err; }
-
-      if (!--counter) { cb(); }
-    }
+    next    = after(12, cb);
 
     for (i = 0; i < 10; i++) {
-      db.put(prefix + i, 'JoeBar', after);
+      db.put(prefix + i, 'JoeBar', next);
     }
 
     // insert some non-prefixed values
-    db.put('foo', 'bar', after);
-    db.put('baz', 'bz', after);
+    db.put('foo', 'bar', next);
+    db.put('baz', 'bz', next);
   }
 
-  setup(function() {
+  setup(function(err) {
+    if (err) { throw err; }
+
     test('readStream', function(t) {
       t.plan(3);
 

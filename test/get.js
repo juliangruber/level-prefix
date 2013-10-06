@@ -1,10 +1,11 @@
-var pre    = require('../'),
-    level  = require('level'),
-    test   = require('tape'),
-    rimraf = require('rimraf'),
-    db, path, preDb, prefix;
-
-path = '/tmp/test-level-prefix';
+var pre    = require('../');
+var level  = require('level');
+var test   = require('tape');
+var rimraf = require('rimraf');
+var db;
+var preDb;
+var prefix;
+var path = '/tmp/test-level-prefix';
 
 rimraf(path, function(err) {
   if (err) { throw err; }
