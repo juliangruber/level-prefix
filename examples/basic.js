@@ -1,12 +1,12 @@
 var level = require('level');
-var pre   = require('../');
-var db    = pre(level('/tmp/sample-level-prefix.db'));
+var pre = require('../');
+var db = pre(level('/tmp/sample-level-prefix.db'));
 
 db
-  .prefix('foo')
-  .prefix('bar')
-  .put('key', 'value', function(err) {
-    if (err) { throw err; }
+.prefix('foo')
+.prefix('bar')
+.put('key', 'value', function(err) {
+  if (err) throw err;
+  db.createKeyStream().on('data', console.log);
+});
 
-    db.createKeyStream().on('data', console.log);
-  });

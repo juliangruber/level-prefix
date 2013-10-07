@@ -1,5 +1,5 @@
 var Transform = require('stream').Transform;
-var Duplex    = require('stream').Duplex;
+var Duplex = require('stream').Duplex;
 
 module.exports = install;
 
@@ -73,11 +73,13 @@ Pre.prototype.createValueStream = function(options) {
 Pre.prototype.writeStream =
 Pre.prototype.createWriteStream = function(opts) {
   var prefix = this._prefix;
+
   var tr = Transform({ objectMode: true });
   tr._transform = function(obj, enc, done) {
     obj.key = prefix + obj.key;
     done(null, obj);
   }
+
   var dpl = Duplex({ objectMode: true });
   var ws = this.db.createWriteStream(opts);
   dpl.pipe(tr).pipe(ws).pipe(dpl);
@@ -100,19 +102,15 @@ Pre.prototype.batch = function(ops, options, cb) {
 };
 
 Pre.prototype._decorateChainedBatch = function(batch) {
-  var prefix, methods;
-
-  prefix  = this._prefix;
-  methods = ['put', 'del'];
+  var prefix  = this._prefix;
+  var methods = ['put', 'del'];
 
   methods.forEach(function(method) {
     var original = batch[method];
 
     batch[method] = function() {
       var args = Array.prototype.slice.call(arguments);
-
       args[0] = prefix + args[0];
-
       return original.apply(batch, args);
     };
   });

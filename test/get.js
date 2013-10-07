@@ -1,39 +1,28 @@
-var pre    = require('../');
-var level  = require('level');
-var test   = require('tape');
+var pre = require('../');
+var level = require('level');
+var test = require('tape');
 var rimraf = require('rimraf');
-var db;
-var preDb;
-var prefix;
 var path = '/tmp/test-level-prefix';
 
-rimraf(path, function(err) {
-  if (err) { throw err; }
+test('get', function(t) {
+  t.plan(5);
+  rimraf.sync(path);
 
-  function setup(cb) {
-    db     = level(path);
-    prefix = 'ns-';
-    preDb = pre(db).prefix(prefix);
-    db.put(prefix + 'foo', 'JoeBar', cb);
-  }
+  var db = level(path);
+  var prefix = 'ns-';
+  var preDb = pre(db).prefix(prefix);
 
-  setup(function(err) {
-    if (err) { throw err; }
-
-    test('get', function(t) {
-      t.plan(4);
-
-      function getAndCheck(dbInstance, key, assertMsg) {
-        dbInstance.get(key, function(err, val) {
-          t.error(err);
-
-          t.equal(val, 'JoeBar', assertMsg);
-        });
-      }
-
-      getAndCheck(preDb, 'foo', 'preDb.get()');
-      // make sure db.get() works like before prefixing
-      getAndCheck(db, (prefix + 'foo'), 'db.get()');
-    });
+  db.put(prefix + 'foo', 'JoeBar', function(err) {
+    t.error(err);
+    getAndCheck(preDb, 'foo', 'preDb.get()');
+    getAndCheck(db, (prefix + 'foo'), 'db.get()');
   });
+
+  function getAndCheck(dbInstance, key, assertMsg) {
+    dbInstance.get(key, function(err, val) {
+      t.error(err);
+      t.equal(val, 'JoeBar', assertMsg);
+    });
+  }
 });
+

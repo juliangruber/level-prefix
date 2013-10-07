@@ -1,56 +1,37 @@
-var pre    = require('../');
-var level  = require('level');
-var test   = require('tape');
+var pre = require('../');
+var level = require('level');
+var test = require('tape');
 var rimraf = require('rimraf');
-var after  = require('after');
-var db;
-var preDb;
-var prefix;
 var path = '/tmp/test-level-prefix';
 
-rimraf(path, function(err) {
-  if (err) { throw err; }
+test('readStream', function(t) {
+  t.plan(3);
+  rimraf.sync(path);
 
-  function setup(cb) {
-    var next;
+  var db = level(path);
+  var prefix = 'ns-';
+  var preDb = pre(db).prefix(prefix);
 
-    db      = level(path);
-    prefix  = 'ns-';
-    preDb   = pre(db).prefix(prefix);
-    next    = after(12, cb);
-
-    for (i = 0; i < 10; i++) {
-      db.put(prefix + i, 'JoeBar', next);
-    }
-
-    // insert some non-prefixed values
-    db.put('foo', 'bar', next);
-    db.put('baz', 'bz', next);
+  for (i = 0; i < 10; i++) {
+    db.put(prefix + i, 'JoeBar');
   }
 
-  setup(function(err) {
-    if (err) { throw err; }
+  db.put('foo', 'bar');
+  db.put('baz', 'bz');
 
-    test('readStream', function(t) {
-      t.plan(3);
-
-      function checkReadStream(dbInstance, opts, count, assertMsg) {
-        var _count = 0;
-
-        dbInstance.createReadStream(opts).on('data', function() {
-          _count++;
-        }).on('end', function() {
-          t.equal(count, _count, assertMsg);
-        });
-      }
-
-      // 10 values are prefixed and 2 are'n
-      checkReadStream(db, {}, 12, 'db.createReadStream() no opts');
-      checkReadStream(preDb, {}, 10, 'preDb.createReadStream() no opts');
-      checkReadStream(preDb, {
-        start : '6',
-        end   : '8',
-      }, 3, 'preDb.createReadStream with opts');
+  function checkReadStream(dbInstance, opts, count, assertMsg) {
+    dbInstance.createReadStream(opts).on('data', function() {
+      count--;
+    }).on('end', function() {
+      t.equal(count, 0, assertMsg);
     });
-  });
+  }
+
+  checkReadStream(db, {}, 12, 'db.createReadStream() no opts');
+  checkReadStream(preDb, {}, 10, 'preDb.createReadStream() no opts');
+  checkReadStream(preDb, {
+    start : '6',
+    end   : '8',
+  }, 3, 'preDb.createReadStream with opts');
 });
+
