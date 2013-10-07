@@ -2,22 +2,68 @@ var pre = require('../');
 var level = require('level');
 var test = require('tape');
 var rimraf = require('rimraf');
+var after = require('after');
 var path = '/tmp/test-level-prefix';
 
-
 test('keyStream && valueStream', function(t) {
-  t.plan(12);
+  t.plan(13);
   rimraf.sync(path);
 
   var db = level(path);
   var prefix = 'ns-';
   var preDb = pre(db).prefix(prefix);
+  var cb = after(12, inserted);
 
   for (i = 0; i < 10; i++) {
-    db.put(prefix + i, 'prefixed-' + i);
+    db.put(prefix + i, 'prefixed-' + i, cb);
   }
-  db.put('foo', 'original-1');
-  db.put('foo2', 'original-2');
+  db.put('foo', 'original-1', cb);
+  db.put('foo2', 'original-2', cb);
+
+  function inserted(err) {
+    t.error(err);
+
+    var checkKeyStream = checkStream('Key');
+    var checkValueStream = checkStream('Value');
+
+    checkKeyStream(db, {}, {
+      count: 12,
+      assertMsg: 'db.createKeyStream() no opts',
+      pattern: /^(foo|ns)/
+    });
+    checkKeyStream(preDb, {}, {
+      count: 10,
+      assertMsg: 'preDb.createKeyStream() no opts',
+      pattern: /^ns-/
+    });
+    checkKeyStream(preDb, {
+      start: '6',
+      end: '8',
+    }, {
+      count: 3,
+      assertMsg: 'preDb.createKeyStream() with opts',
+      pattern: /^ns-/
+    });
+
+    checkValueStream(db, {}, {
+      count: 12,
+      assertMsg: 'db.createValueStream() no opts',
+      pattern: /^(prefixed|original)/
+    });
+    checkValueStream(preDb, {}, {
+      count: 10,
+      assertMsg: 'preDb.createValueStream() no opts',
+      pattern: /^prefixed-/
+    });
+    checkValueStream(preDb, {
+      start: '6',
+      end: '8',
+    }, {
+      count: 3,
+      assertMsg: 'preDb.createValueStream() with opts',
+      pattern: /^prefixed-/
+    });
+  }
 
   function checkStream(type) {
     return function(dbInstance, opts, params) {
@@ -36,45 +82,5 @@ test('keyStream && valueStream', function(t) {
     }
   }
 
-  var checkKeyStream = checkStream('Key');
-  var checkValueStream = checkStream('Value');
-
-  checkKeyStream(db, {}, {
-    count: 12,
-    assertMsg: 'db.createKeyStream() no opts',
-    pattern: /^(foo|ns)/
-  });
-  checkKeyStream(preDb, {}, {
-    count: 10,
-    assertMsg: 'preDb.createKeyStream() no opts',
-    pattern: /^ns-/
-  });
-  checkKeyStream(preDb, {
-    start: '6',
-    end: '8',
-  }, {
-    count: 3,
-    assertMsg: 'preDb.createKeyStream() with opts',
-    pattern: /^ns-/
-  });
-
-  checkValueStream(db, {}, {
-    count: 12,
-    assertMsg: 'db.createValueStream() no opts',
-    pattern: /^(prefixed|original)/
-  });
-  checkValueStream(preDb, {}, {
-    count: 10,
-    assertMsg: 'preDb.createValueStream() no opts',
-    pattern: /^prefixed-/
-  });
-  checkValueStream(preDb, {
-    start: '6',
-    end: '8',
-  }, {
-    count: 3,
-    assertMsg: 'preDb.createValueStream() with opts',
-    pattern: /^prefixed-/
-  });
 });
 
