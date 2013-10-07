@@ -1,5 +1,5 @@
 var Transform = require('stream').Transform;
-var Duplex = require('stream').Duplex;
+var Duplex    = require('stream').Duplex;
 
 module.exports = install;
 
@@ -60,6 +60,16 @@ Pre.prototype.createReadStream = function(opts) {
   return this.db.createReadStream(opts);
 };
 
+Pre.prototype.keyStream =
+Pre.prototype.createKeyStream = function(options) {
+  return this.db.createKeyStream.call(this, options);
+};
+
+Pre.prototype.valueStream =
+Pre.prototype.createValueStream = function(options) {
+  return this.db.createValueStream.call(this, options);
+};
+
 Pre.prototype.writeStream =
 Pre.prototype.createWriteStream = function(opts) {
   var prefix = this._prefix;
@@ -71,7 +81,43 @@ Pre.prototype.createWriteStream = function(opts) {
   var dpl = Duplex({ objectMode: true });
   var ws = this.db.createWriteStream(opts);
   dpl.pipe(tr).pipe(ws).pipe(dpl);
+
   return dpl;
+};
+
+Pre.prototype.batch = function(ops, options, cb) {
+  var prefix = this._prefix;
+
+  if (!arguments.length) {
+    return this._decorateChainedBatch(this.db.batch());
+  }
+
+  ops.forEach(function(op) {
+    op.key = prefix + op.key;
+  });
+
+  this.db.batch(ops, options, cb);
+};
+
+Pre.prototype._decorateChainedBatch = function(batch) {
+  var prefix, methods;
+
+  prefix  = this._prefix;
+  methods = ['put', 'del'];
+
+  methods.forEach(function(method) {
+    var original = batch[method];
+
+    batch[method] = function() {
+      var args = Array.prototype.slice.call(arguments);
+
+      args[0] = prefix + args[0];
+
+      return original.apply(batch, args);
+    };
+  });
+
+  return batch;
 };
 
 Pre.prototype.prefix = function(name) {

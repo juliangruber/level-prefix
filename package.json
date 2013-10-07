@@ -13,6 +13,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "after": "0.8.x",
     "level": "0.17.x",
     "tape": "1.1.x",
     "rimraf": "2.2.x"
