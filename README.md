@@ -37,6 +37,10 @@ With [npm](https://npmjs.org) do:
 npm install level-prefix
 ```
 
+## Contributors
+
+* [Alexandru Vladutu](https://github.com/alessioalex)
+
 ## License
 
 (MIT)
