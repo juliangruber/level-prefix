@@ -74,18 +74,24 @@ Pre.prototype.writeStream =
 Pre.prototype.createWriteStream = function(opts) {
   var prefix = this._prefix;
 
-  var tr = Transform({ objectMode: true });
+  var tr = new Transform({ objectMode: true });
   tr._transform = function(obj, enc, done) {
     obj.key = prefix + obj.key;
+
     done(null, obj);
   }
 
-  var dpl = Duplex({ objectMode: true });
-  var ws = this.db.createWriteStream(opts);
-  dpl.pipe(tr).pipe(ws).pipe(dpl);
+  tr._flush = function() {
+    // emit 'close' event, to maintain compatibility with the LevelUp API
+    this.emit('close');
+  }
 
-  return dpl;
-};
+  var ws = this.db.createWriteStream(opts);
+
+  tr.pipe(ws);
+
+  return tr;
+}
 
 Pre.prototype.batch = function(ops, options, cb) {
   var prefix = this._prefix;
