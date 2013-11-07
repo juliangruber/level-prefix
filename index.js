@@ -1,5 +1,6 @@
 var Transform = require('stream').Transform || require('readable-stream').Transform;
 var Duplex = require('stream').Duplex;
+var extend = require('xtend');
 
 module.exports = install;
 
@@ -62,12 +63,12 @@ Pre.prototype.createReadStream = function(opts) {
 
 Pre.prototype.keyStream =
 Pre.prototype.createKeyStream = function(options) {
-  return this.db.createKeyStream.call(this, options);
+  return this.createReadStream(extend(options, { keys: true, values: false }));
 };
 
 Pre.prototype.valueStream =
 Pre.prototype.createValueStream = function(options) {
-  return this.db.createValueStream.call(this, options);
+  return this.createReadStream(extend(options, { keys: false, values: true }));
 };
 
 Pre.prototype.writeStream =

@@ -12,7 +12,8 @@
     "test": "set -e; for t in test/*.js; do node $t; done"
   },
   "dependencies": {
-    "readable-stream": "1.1.x"
+    "readable-stream": "1.1.x",
+    "xtend": "~2.1.1"
   },
   "devDependencies": {
     "after": "0.8.x",
